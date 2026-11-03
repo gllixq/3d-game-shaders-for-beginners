@@ -42,6 +42,21 @@ out vec4 reflectionMaskOut;
 out vec4 refractionMaskOut;
 out vec4 foamMaskOut;
 
+mat3 tangentToView() {
+  vec3 N = normalize(vertexNormal);
+  vec3 T = normalize(tangent);
+  vec3 B = normalize(binormal);
+
+  T = normalize(T - N * dot(N, T));
+
+  float handedness = sign(dot(cross(N, T), B));
+  if (handedness == 0.0) { handedness = 1.0; }
+
+  B = cross(N, T) * handedness;
+
+  return mat3(T, B, N);
+}
+
 void main() {
   vec2 flow   = texture(flowTexture,  normalCoord).xy;
        flow   = (flow - 0.5) * 2.0;
@@ -66,15 +81,7 @@ void main() {
         * 2.0
         - 1.0
         );
-    normal =
-      normalize
-        ( mat3
-            ( tangent
-            , binormal
-            , vertexNormal
-            )
-        * normal
-        );
+    normal = normalize(tangentToView() * normal);
   } else {
     normal = normalize(vertexNormal);
   }
