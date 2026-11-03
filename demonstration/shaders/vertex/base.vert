@@ -64,9 +64,11 @@ void main() {
   vertexColor    = p3d_Color;
   vertexPosition = p3d_ModelViewMatrix * p3d_Vertex;
 
+  // Normals use the inverse-transpose. Tangents follow the surface, so they use
+  // the linear part of ModelView. The fragment shader re-orthonormalizes them.
   vertexNormal = normalize(p3d_NormalMatrix * p3d_Normal);
-  binormal     = normalize(p3d_NormalMatrix * p3d_Binormal);
-  tangent      = normalize(p3d_NormalMatrix * p3d_Tangent);
+  tangent      = normalize(mat3(p3d_ModelViewMatrix) * p3d_Tangent);
+  binormal     = normalize(mat3(p3d_ModelViewMatrix) * p3d_Binormal);
 
   normalCoord   = p3d_MultiTexCoord0;
   diffuseCoord  = p3d_MultiTexCoord1;

@@ -90,6 +90,21 @@ in vec2 normalCoord;
 out vec4 out0;
 out vec4 out1;
 
+mat3 tangentToView() {
+  vec3 N = normalize(vertexNormal);
+  vec3 T = normalize(tangent);
+  vec3 B = normalize(binormal);
+
+  T = normalize(T - N * dot(N, T));
+
+  float handedness = sign(dot(cross(N, T), B));
+  if (handedness == 0.0) { handedness = 1.0; }
+
+  B = cross(N, T) * handedness;
+
+  return mat3(T, B, N);
+}
+
 void main() {
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
   int   shadowSamples = 2;
@@ -129,15 +144,7 @@ void main() {
         * 2.0
         - 1.0
         );
-    normal =
-      normalize
-        ( mat3
-            ( tangent
-            , binormal
-            , vertexNormal
-            )
-        * normalRaw
-        );
+    normal = normalize(tangentToView() * normalRaw);
   } else {
     normal =
       normalize(vertexNormal);
